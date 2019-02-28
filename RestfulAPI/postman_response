@@ -1,0 +1,27 @@
+[
+  {
+    "ArtistID": 89, 
+    "name": "Lady Gaga", 
+    "prediction": 0.791162936
+  }, 
+  {
+    "ArtistID": 182, 
+    "name": "Keane", 
+    "prediction": 0.444846415
+  }, 
+  {
+    "ArtistID": 65, 
+    "name": "Coldplay", 
+    "prediction": 0.39173945600000004
+  }, 
+  {
+    "ArtistID": 209, 
+    "name": "My Chemical Romance", 
+    "prediction": 0.23354831399999998
+  }, 
+  {
+    "ArtistID": 95, 
+    "name": "Simply Red", 
+    "prediction": 0.207100399
+  }
+]
