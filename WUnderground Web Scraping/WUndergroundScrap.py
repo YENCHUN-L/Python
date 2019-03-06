@@ -29,7 +29,7 @@ Pressure = str()
 Precip = str()
 
     
-CHROMEDRIVER_PATH = "C:/Users/yliu10/Documents/chromedriver.exe"
+CHROMEDRIVER_PATH = "/chromedriver.exe"
 
 options = webdriver.ChromeOptions()
 options.add_argument('headless')
@@ -116,8 +116,11 @@ for r in range(len(date_list)):
     else:
         today_df = pd.DataFrame(today_data)
         all_date_df=pd.concat([all_date_df, today_df])
-    
+   
     time_elapsed = datetime.now() - start_time
     print('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed))
     
 all_date_df.to_csv("WeatherLille.csv")
+
+#VIRIYAKOVITHYA Ekapope
+#Yen Chun Liu
