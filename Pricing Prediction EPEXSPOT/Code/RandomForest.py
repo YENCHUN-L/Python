@@ -5,11 +5,6 @@ random.seed (2)
 
 import pandas as pd
 import numpy as np
-#import matplotlib.pyplot as plt
-#from pandas import Series
-#import seaborn as sns
-#import time
-#import datetime
 
 #EPEX
 df = pd.read_csv("EPEX_combined.csv")
@@ -262,7 +257,6 @@ epex_weather.columns = ['date_time',
 
 epex_weather['date_time'] = pd.to_datetime(epex_weather['date_time'])
 
-
 #Entose
 forecast_transfer_capacities = pd.read_csv("Final_Data_Forecasted_Transfer_Capacities_day_ahead.csv")
 forecast_transfer_capacities.drop(forecast_transfer_capacities.index[43876], inplace=True)
@@ -306,88 +300,33 @@ epex_weather_entose = pd.merge(epex_weather_entose, price_transmission ,on='date
 del [price_transmission]
 
 
-#epex_weather_entose.to_csv("epex_weather_entose.csv")
-
-##################
-# Drop variables #
-##################
-
-drop = ["cloudcover", "uvIndex", "sunHour", "winddirDegree", "moonrise","moonset",
-        "sunrise", "sunset"]
-locate = ['bordeaux_', 'dijon_', 'lille_', 'lyon_','marseille_', 'montpellier_',
-          'poitiers_', 'reim_']
-for variable in drop:
-    for area in locate:
-        epex_weather_entose.drop([area + variable], axis=1, inplace=True)
-del [drop, locate, area]
-
-
-list(epex_weather_entose)
-
-###########
-# Average #
-###########
-
-#variable = "FeelsLikeC"
-#dates = pd.to_datetime(epex_weather['date_time'])
-#plt.figure(figsize=(15,10))
-#plt.title(variable)
-#plt.plot_date(dates, epex_weather['bordeaux_'+ variable])
-#plt.plot_date(dates, epex_weather['dijon_'+ variable])
-#plt.plot_date(dates, epex_weather['lille_'+ variable])
-#plt.plot_date(dates, epex_weather['lyon_'+ variable])
-#plt.plot_date(dates, epex_weather['marseille_'+ variable])
-#plt.plot_date(dates, epex_weather['montpellier_'+ variable])
-#plt.plot_date(dates, epex_weather['poitiers_'+ variable])
-#plt.plot_date(dates, epex_weather['reim_'+ variable])
-#plt.show
-#epex_weather['average_'+ variable] = epex_weather[['bordeaux_'+ variable, 'dijon_'+ variable
-#            , 'lille_'+ variable, 'lyon_'+ variable, 'marseille_'+ variable
-#            , 'montpellier_'+ variable, 'poitiers_'+ variable, 'reim_'+ variable]].mean(axis=1)
-#epex_weather.drop(['bordeaux_'+ variable, 'dijon_'+ variable
-#            , 'lille_'+ variable, 'lyon_'+ variable, 'marseille_'+ variable
-#            , 'montpellier_'+ variable, 'poitiers_'+ variable, 'reim_'+ variable], axis=1, inplace=True)
-#list(epex_weather)
-
-average = ["DewPointC", "FeelsLikeC", "HeatIndexC", "humidity", "maxtempC", "mintempC",
-           "moon_illumination", "totalSnow_cm", "WindChillC", "tempC", "WindGustKmph",
-           "windspeedKmph", "pressure", "visibility", "precipMM"]
-
-for variable in average:
-    epex_weather_entose['average_'+ variable] = epex_weather_entose[['bordeaux_'+ variable,
-                       'dijon_'+ variable, 'lille_'+ variable
-                       , 'lyon_'+ variable, 'marseille_'+ variable
-                       , 'montpellier_'+ variable, 'poitiers_'+ variable
-                       , 'reim_'+ variable]].mean(axis=1)
-    epex_weather_entose.drop(['bordeaux_'+ variable,
-                       'dijon_'+ variable, 'lille_'+ variable
-                       , 'lyon_'+ variable, 'marseille_'+ variable
-                       , 'montpellier_'+ variable, 'poitiers_'+ variable
-                       , 'reim_'+ variable], axis=1, inplace=True)
-
-del [average, variable]
-
-list(epex_weather_entose)
-
-#columntype = epex_weather_entose.dtypes
-#describe = np.round(epex_weather_entose.describe(), 2).T
-#describe.to_csv("describe.csv")
-#corr = epex_weather_entose.corr()
-#corr.to_csv("corr.csv")
-#sns.boxplot(x=df["Prices"],data=df)
-#list(df.columns.values)
-
 holiday = pd.read_csv("France_Holidays_combined.csv")
 del(holiday['Unnamed: 0'])
 holiday['date_time']= pd.to_datetime(holiday['date_time'])
 df = pd.merge(epex_weather_entose,holiday,on='date_time', how='left')
 
+del [epex_weather_entose]
 #df.to_csv("df_merged.csv")
 #df = df[df.date_time.between('2015-01-01','2018-12-31')]
+#columntype = df.dtypes
+#describe = np.round(df.describe(), 2).T
+#describe.to_csv("describe.csv")
+#corr = df.corr()
+#corr.to_csv("corr.csv")
+#sns.boxplot(x=df["Prices"],data=df)
+#list(df.columns.values)
 
-import seaborn as sns
-import matplotlib.pyplot as plt 
-import os
+
+""" Drop variables """
+
+drop = ["cloudcover", "uvIndex", "moonrise","moonset",
+        "sunrise", "sunset", "sunHour"]
+locate = ['bordeaux_', 'dijon_', 'lille_', 'lyon_','marseille_', 'montpellier_',
+          'poitiers_', 'reim_']
+for variable in drop:
+    for area in locate:
+        df.drop([area + variable], axis=1, inplace=True)
+del [drop, locate, area, variable]
 
 df.drop(['i_DateTime',
          'i_Low',
@@ -422,7 +361,61 @@ df.drop(['i_DateTime',
          'd_BasePrice',
          'd_BaseVolume',
          'd_PeakPrice',
-         'd_PeakVolume',], axis=1,inplace=True)
+         'd_PeakVolume',
+         'd_Volume'], axis=1,inplace=True)
+
+
+""" Create variables """
+df[['date_time','d_Prices']][df['d_Prices'].isnull()]
+
+df['price_diff'] = df['d_Prices']-df['i_Idx']
+
+#Target to 1 or 0
+df['d_higher'] = np.where(df['price_diff']>0, 1,0)
+
+#variable = "FeelsLikeC"
+#dates = pd.to_datetime(epex_weather['date_time'])
+#plt.figure(figsize=(15,10))
+#plt.title(variable)
+#plt.plot_date(dates, epex_weather['bordeaux_'+ variable])
+#plt.plot_date(dates, epex_weather['dijon_'+ variable])
+#plt.plot_date(dates, epex_weather['lille_'+ variable])
+#plt.plot_date(dates, epex_weather['lyon_'+ variable])
+#plt.plot_date(dates, epex_weather['marseille_'+ variable])
+#plt.plot_date(dates, epex_weather['montpellier_'+ variable])
+#plt.plot_date(dates, epex_weather['poitiers_'+ variable])
+#plt.plot_date(dates, epex_weather['reim_'+ variable])
+#plt.show
+#epex_weather['average_'+ variable] = epex_weather[['bordeaux_'+ variable, 'dijon_'+ variable
+#            , 'lille_'+ variable, 'lyon_'+ variable, 'marseille_'+ variable
+#            , 'montpellier_'+ variable, 'poitiers_'+ variable, 'reim_'+ variable]].mean(axis=1)
+#epex_weather.drop(['bordeaux_'+ variable, 'dijon_'+ variable
+#            , 'lille_'+ variable, 'lyon_'+ variable, 'marseille_'+ variable
+#            , 'montpellier_'+ variable, 'poitiers_'+ variable, 'reim_'+ variable], axis=1, inplace=True)
+#list(epex_weather)
+
+#Combine and drop weather 
+average = ["DewPointC", "FeelsLikeC", "HeatIndexC", "humidity", "maxtempC", "mintempC",
+           "moon_illumination", "totalSnow_cm", "WindChillC", "tempC", "WindGustKmph",
+           "windspeedKmph", "pressure", "visibility", "precipMM", "winddirDegree"]
+
+for variable in average:
+    df['average_'+ variable] = df[['bordeaux_'+ variable,
+                       'dijon_'+ variable, 'lille_'+ variable
+                       , 'lyon_'+ variable, 'marseille_'+ variable
+                       , 'montpellier_'+ variable, 'poitiers_'+ variable
+                       , 'reim_'+ variable]].mean(axis=1)
+    df.drop(['bordeaux_'+ variable,
+                       'dijon_'+ variable, 'lille_'+ variable
+                       , 'lyon_'+ variable, 'marseille_'+ variable
+                       , 'montpellier_'+ variable, 'poitiers_'+ variable
+                       , 'reim_'+ variable], axis=1, inplace=True)
+del [average, variable]
+
+
+import seaborn as sns
+import matplotlib.pyplot as plt 
+import os
 
 df['date_time']=pd.to_datetime(df['date_time'])
 df.index = df['date_time']
@@ -435,18 +428,12 @@ from statsmodels.tsa.seasonal import seasonal_decompose
 from pylab import rcParams
 rcParams['figure.figsize'] = 11, 6
 
-df[['date_time','d_Prices']][df['d_Prices'].isnull()]
-
-df['price_diff'] = df['d_Prices']-df['i_Idx']
 
 ### drop missing price diff rows for now
 result = seasonal_decompose(df['price_diff'].dropna(), model='addtive', freq=365*24)
 fig = result.plot()
 plt.show()
 
-
-
-"""## Add features"""
 # Date features
 df['Hour'] = df.index.hour
 df['dayofweek'] = df.index.dayofweek 
@@ -454,19 +441,19 @@ df['dayofyear'] = df.index.dayofyear
 df['weekofyear'] = df.index.weekofyear
 df['Month'] = df.index.month
 df['quarter'] = df.index.quarter
+
 #df['Last24hrs_mean'] = df['price_diif'].rolling(24).mean().shift(24)
 
-top100_diff = df.nlargest(100, 'price_diff') # top 5 highest
-bottom100_diff = df.nsmallest(100, 'price_diff')
+#top100_diff = df.nlargest(100, 'price_diff') # top 5 highest
+#bottom100_diff = df.nsmallest(100, 'price_diff')
 
 ## Lag data (previous hours)
 def add_Lag(df, lags):
     for i in lags:
         df[f'lag_{i}'] = df['price_diff'].shift(i)
-        
     return df
 
-df = add_Lag(df,[24,48,72,96,120,144,168]) # [24,48,72,96,120,144,168] , range(1,25)
+df = add_Lag(df,[24,48,72,96,120,144,168,744,2196,8760]) # [24,48,72,96,120,144,168] , range(1,25)
 
 pv = pd.pivot_table(df, index=df.index.dayofyear, columns=df.index.year,
                     values='price_diff', aggfunc='mean')
@@ -477,7 +464,6 @@ pv2 = pd.pivot_table(df, index=df.index.dayofyear, columns=df.index.year,
                     values='price_diff', aggfunc='max')
 pv2.plot(title="price_diff Daily Maximum Yearly comparison ",figsize=(14,6), grid=True)
 
-
 peak_months = df.loc[(df['Month'] >= 11) | (df['Month'] <= 3)]
 fig, ax = plt.subplots(figsize=(6,4)) 
 hrvsday = peak_months.pivot_table(values='price_diff',index='Hour',columns='dayofweek',aggfunc='mean')
@@ -486,36 +472,87 @@ sns.heatmap(hrvsday,cmap='magma_r', ax=ax) #  Monday=0, Sunday=6
 ax.set_xlabel('dayofweek (Mon=0, Sun=6)')
 plt.show()
 
+
+
+""" basetable plots """
+#Price fluctuation
+years = [2014,2015,2016,2017,2018]
+for i in years:
+    x = df[df['date_time'].dt.year == i]
+    plt.figure(figsize=(6,4))
+    plt.plot(x['date_time'], x['d_Prices'])
+    plt.plot(x['i_Idx'], 'r', alpha=0.3)
+    plt.title(i)
+    plt.legend(loc="upper right", shadow=True, fancybox =True) 
+    plt.grid(True)
+    plt.show()
+
+
+# Target around 50% each year
+years = [2014,2015,2016,2017,2018]
+for i in years:
+    plt.figure(figsize=(6,4))
+    x = df[df['date_time'].dt.year == i]
+    sns.countplot(x['d_higher'])
+    plt.title(i)
+    plt.show()
+
+
+
+features = ["dayofweek","Month","quarter","dayofyear"]
+for i in features:
+    fig, ax = plt.subplots(figsize=(6,4))
+    hrvsday = df.pivot_table(values='d_higher',index='Hour',columns=i,aggfunc='mean')
+    ax.set_title("d_higher " + i + " vs. Hour in average")
+    sns.heatmap(hrvsday,cmap='magma_r', ax=ax) #  Monday=0, Sunday=6
+    plt.show()
+
+
+features = ['average_DewPointC',
+             'average_FeelsLikeC',
+             'average_HeatIndexC',
+             'average_humidity',
+             'average_maxtempC',
+             'average_mintempC',
+             'average_moon_illumination',
+             'average_totalSnow_cm',
+             'average_WindChillC',
+             'average_tempC',
+             'average_WindGustKmph',
+             'average_windspeedKmph',
+             'average_pressure',
+             'average_visibility',
+             'average_precipMM', 
+             "average_winddirDegree"]
+for i in features:
+    x = df.groupby([i])[['d_higher']].mean()
+    plt.figure(figsize=(6,4))
+    plt.title(i)
+    plt.plot(x.index, x['d_higher'])
+    #plt.axis([0, 6, 0, 20])
+    plt.legend(loc="lower right", shadow=True, fancybox =True) 
+    plt.grid(True)
+    plt.show()
+    del [x]
+
+
+
+""" Finalize basetable for use"""
 # change dayofweek to dummies 
 df.dayofweek = df.dayofweek.apply(str)
 df = pd.get_dummies(df, prefix=['dayofweek'])
 
-# drop na
 df = df.dropna()
 df.info()
 # drop date_time column and prices that we do not know in advance
-df.drop(['date_time','i_Idx'], axis=1,inplace=True)
-df.info()
+#df.drop(['date_time','d_Prices','i_Idx','price_diff'], axis=1,inplace=True)
 
-#Target to 1 or 0
-df['d_higher'] = np.where(df['price_diff']>0, 1,0)
-df.drop(['price_diff'], axis=1,inplace=True)
 
-df.drop([
- 'isHoliday',
- 'dayofweek_0',
- 'dayofweek_1',
- 'dayofweek_2',
- 'dayofweek_3',
- 'dayofweek_4',
- 'dayofweek_5',
- 'dayofweek_6',
- 'Month'], axis=1,inplace=True)
+"""Adjust feature"""
+df.drop(['isHoliday' ], axis=1,inplace=True)
 
-list(df)
 
 """## Split train/test data"""
-
 train_percent = 0.7
 train = df.iloc[:int(len(df)*train_percent)]
 test = df.iloc[int(len(df)*train_percent):]
@@ -524,41 +561,98 @@ X_test = test.drop(columns=['d_higher'])
 y_train = train['d_higher']
 y_test = test['d_higher']
 y_test[y_test.isnull()]
+X_train.drop(['date_time','d_Prices','i_Idx','price_diff'], axis=1,inplace=True)
+X_test.drop(['date_time','d_Prices','i_Idx','price_diff'], axis=1,inplace=True)
+sum(test['price_diff'])
+
+# over sampling train data
+#from imblearn.over_sampling import RandomOverSampler
+#ros = RandomOverSampler(random_state=0)
+#X_train, y_train = ros.fit_resample(X_train, y_train)
+#X_train = pd.DataFrame(data=X_train)
+#X_train.columns = list(X_test)
 
 
+""" RandomForest Classifier """
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import roc_curve, auc,mean_squared_error, mean_absolute_error, confusion_matrix, classification_report, accuracy_score
+clf = RandomForestClassifier(n_estimators=100, criterion='gini', max_depth=2,
+                             min_samples_split=2, min_samples_leaf=1,
+                             min_weight_fraction_leaf=0.0, max_features='auto',
+                             max_leaf_nodes=None, min_impurity_decrease=0.0,
+                             min_impurity_split=None, bootstrap=True,
+                             oob_score=False, n_jobs=None, random_state=None,
+                             verbose=0, warm_start=False, class_weight=None)
+clf.fit(X_train, y_train)
+clf_train_pred = clf.predict(X_train)
+clf_test_pred = clf.predict(X_test)
 
-rfc = RandomForestClassifier(n_estimators=100)
-rfc.fit(X_train, y_train)
-rfc_pred = rfc.predict(X_test)
-
-for name, importance in zip(list(X_train), rfc.feature_importances_):
+for name, importance in zip(list(X_train), clf.feature_importances_):
     print(name, " ", importance)
 
-print(confusion_matrix(y_test,rfc_pred))
-print(classification_report(y_test,rfc_pred))
-print(accuracy_score(y_test,rfc_pred))
-print(mean_squared_error(y_test,rfc_pred))
-print(mean_absolute_error(y_test,rfc_pred))
+predictors=list(X_train)
+feat_imp = pd.Series(clf.feature_importances_, predictors).sort_values(ascending=True)
+feat_imp.plot(kind='barh', title='Importance of Features')
+plt.savefig('rfc feature importance.jpg', transparent=True)
 
-y_score = rfc.predict_proba(X_test)[:,1]
-fpr = dict()
-tpr = dict()
-fpr, tpr, _ = roc_curve(y_test, y_score)
-roc_auc = dict()
-roc_auc = auc(fpr, tpr)
-print(roc_auc)
+
+""" Evaluation """
+from sklearn.metrics import roc_auc_score, roc_curve, auc,mean_squared_error\
+                            ,mean_absolute_error, confusion_matrix\
+                            ,classification_report, accuracy_score
+
+cm = confusion_matrix(y_test,clf_test_pred)
+print("confusion_matrix: \n",cm)
+total=sum(sum(cm))
+sensitivity1 = cm[1,1]/(cm[1,0]+cm[1,1])
+print('Sensitivity : ', sensitivity1 )
+specificity1 = cm[0,0]/(cm[0,0]+cm[0,1])
+print('Specificity : ', specificity1)
+accuracy=(cm[0,0]+cm[1,1])/total
+print ('Accuracy : ', accuracy)
+
+test['predict'] = clf_test_pred
+print(test.groupby(['d_higher'])[["price_diff"]].sum())
+print(test.groupby(['d_higher','predict'])[["price_diff"]].sum())
+
+
+describe = np.round(test.describe(), 2).T
+
+#print("classification_report: \n",classification_report(y_test,clf_test_pred))
+#print("train_roc_auc_score:",roc_auc_score(y_train, clf_train_pred))
+#print("test_roc_auc_score:",roc_auc_score(y_test, clf_test_pred))
+#print("train_accuracy_score:",accuracy_score(y_train, clf_train_pred))
+#print("test_accuracy_score:",accuracy_score(y_test, clf_test_pred))
+#print("train_mean_squared_error:",mean_squared_error(y_train, clf_train_pred))
+#print("test_mean_squared_error:",mean_squared_error(y_test, clf_test_pred))
+#print("train_mean_absolute_error:",mean_absolute_error(y_train, clf_train_pred))
+#print("test_mean_absolute_error:",mean_absolute_error(y_test, clf_test_pred))
+
+#y_score = clf.predict_proba(X_train)[:,1]
+#train_fpr = dict()
+#train_tpr = dict()
+#train_fpr, train_tpr, _ = roc_curve(y_train, y_score)
+#train_roc_auc = dict()
+#train_roc_auc = auc(train_fpr, train_tpr)
+#print("train_roc_auc:",train_roc_auc)
+
+#y_score = clf.predict_proba(X_test)[:,1]
+#fpr = dict()
+#tpr = dict()
+#fpr, tpr, _ = roc_curve(y_test, y_score)
+#roc_auc = dict()
+#roc_auc = auc(fpr, tpr)
+#print("test_roc_auc:",roc_auc)
 
 # make the plot
-plt.figure(figsize=(5,5))
-plt.plot([0, 1], [0, 1], 'k--')
-plt.xlim([0, 1.0])
-plt.ylim([0.0, 1.0])
-plt.xlabel('False Positive Rate')
-plt.ylabel('True Positive Rate')
-plt.grid(True)
-plt.plot(fpr, tpr, label='AUC = {0}'.format(roc_auc))        
-plt.legend(loc="lower right", shadow=True, fancybox =True) 
-plt.show()
-del [fpr, tpr, roc_auc, y_score]
+#plt.figure(figsize=(5,5))
+#plt.plot([0, 1], [0, 1], 'k--')
+#plt.xlim([0, 1.0])
+#plt.ylim([0.0, 1.0])
+#plt.xlabel('False Positive Rate')
+#plt.ylabel('True Positive Rate')
+#plt.grid(True)
+#plt.plot(train_fpr, train_tpr, label='Train_AUC = {0}'.format(train_roc_auc)) 
+#plt.plot(fpr, tpr, label='Test_AUC = {0}'.format(roc_auc))         
+#plt.legend(loc="lower right", shadow=True, fancybox =True) 
+#plt.show()
+#del [fpr, tpr, roc_auc, y_score]

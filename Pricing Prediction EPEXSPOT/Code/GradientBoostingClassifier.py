@@ -479,35 +479,32 @@ plt.show()
 years = [2014,2015,2016,2017,2018]
 for i in years:
     x = df[df['date_time'].dt.year == i]
-    plt.figure(figsize=(16,9))
+    plt.figure(figsize=(6,4))
     plt.plot(x['date_time'], x['d_Prices'])
     plt.plot(x['i_Idx'], 'r', alpha=0.3)
     plt.title(i)
     plt.legend(loc="upper right", shadow=True, fancybox =True) 
     plt.grid(True)
-    plt.savefig("Price fluctuation" + str(i) +'.jpg', transparent=True)
     plt.show()
 
 
 # Target around 50% each year
 years = [2014,2015,2016,2017,2018]
 for i in years:
-    plt.figure(figsize=(16,9))
+    plt.figure(figsize=(6,4))
     x = df[df['date_time'].dt.year == i]
     sns.countplot(x['d_higher'])
     plt.title(i)
-    plt.savefig("Target_" + str(i) +'.jpg', transparent=True)
     plt.show()
 
 
 
 features = ["dayofweek","Month","quarter","dayofyear"]
 for i in features:
-    fig, ax = plt.subplots(figsize=(16,9))
+    fig, ax = plt.subplots(figsize=(6,4))
     hrvsday = df.pivot_table(values='d_higher',index='Hour',columns=i,aggfunc='mean')
     ax.set_title("d_higher " + i + " vs. Hour in average")
     sns.heatmap(hrvsday,cmap='magma_r', ax=ax) #  Monday=0, Sunday=6
-    plt.savefig("d_higher " + str(i) + " vs. Hour in average"+'.jpg', transparent=True)
     plt.show()
 
 
@@ -529,19 +526,18 @@ features = ['average_DewPointC',
              "average_winddirDegree"]
 for i in features:
     x = df.groupby([i])[['d_higher']].mean()
-    plt.figure(figsize=(16,9))
+    plt.figure(figsize=(6,4))
     plt.title(i)
     plt.plot(x.index, x['d_higher'])
     #plt.axis([0, 6, 0, 20])
     plt.legend(loc="lower right", shadow=True, fancybox =True) 
     plt.grid(True)
-    plt.savefig(str(i) +'.jpg', transparent=True)
     plt.show()
     del [x]
 
 
 
-""" Finalize basetable """
+""" Finalize basetable for use"""
 # change dayofweek to dummies 
 df.dayofweek = df.dayofweek.apply(str)
 df = pd.get_dummies(df, prefix=['dayofweek'])
@@ -551,11 +547,7 @@ df.info()
 # drop date_time column and prices that we do not know in advance
 #df.drop(['date_time','d_Prices','i_Idx','price_diff'], axis=1,inplace=True)
 
-df.to_csv("df.csv")
-describe = np.round(df.describe(), 2).T
-describe.to_csv("describe.csv")
-
-""" Adjust feature """
+"""Adjust feature"""
 df.drop(['isHoliday'], axis=1,inplace=True)
 
 
@@ -570,8 +562,11 @@ y_test = test['d_higher']
 y_test[y_test.isnull()]
 X_train.drop(['date_time','d_Prices','i_Idx','price_diff'], axis=1,inplace=True)
 X_test.drop(['date_time','d_Prices','i_Idx','price_diff'], axis=1,inplace=True)
-sum(test['price_diff'])
 
+plt.figure(figsize=(6,4))
+sns.countplot(train['d_higher'])
+plt.title("train_d_higher")
+plt.show()
 # over sampling train data
 #from imblearn.over_sampling import RandomOverSampler
 #ros = RandomOverSampler(random_state=0)
@@ -580,25 +575,27 @@ sum(test['price_diff'])
 #X_train.columns = list(X_test)
 
 
-""" Xgboost classifier """
-import xgboost as xgb
+""" GradientBoostingClassifier """
+from sklearn.ensemble import GradientBoostingClassifier
 
-clf = xgb.XGBClassifier(base_score=0.5, colsample_bylevel=1, colsample_bytree=1,
-       gamma=0, learning_rate=0.1, max_delta_step=0, max_depth=2,
-       min_child_weight=1, missing=None, n_estimators=1000, nthread=-1,
-       objective='binary:logistic', reg_alpha=0, reg_lambda=1,
-       scale_pos_weight=1, seed=0, silent=True, subsample=1)
-clf.fit(X_train, y_train,
-        eval_set=[(X_train, y_train), (X_test, y_test)],
-        early_stopping_rounds=50, #stop if 50 consequent rounds without decrease of error
-        verbose=False) # Change verbose to True if you want to see it train
-
-xgb.plot_importance(clf, height=0.7, max_num_features=50)
-plt.savefig('feature importance.jpg', transparent=True)
-
+clf = GradientBoostingClassifier(loss='deviance', learning_rate=0.01,
+                                 n_estimators=159, subsample=1.0,
+                                 criterion='friedman_mse', min_samples_split=2,
+                                 min_samples_leaf=10, min_weight_fraction_leaf=0.0,
+                                 max_depth=3, min_impurity_decrease=0.0,
+                                 min_impurity_split=None, init=None, random_state=None,
+                                 max_features=None, verbose=0, max_leaf_nodes=None,
+                                 warm_start=False, presort='auto',
+                                 validation_fraction=0.1, n_iter_no_change=None,
+                                 tol=0.0001)
+clf.fit(X_train, y_train)
 clf_train_pred = clf.predict(X_train)
 clf_test_pred = clf.predict(X_test)
 
+predictors=list(X_train)
+feat_imp = pd.Series(clf.feature_importances_, predictors).sort_values(ascending=True)
+feat_imp.plot(kind='barh', title='Importance of Features')
+plt.savefig('gbc feature importance.jpg', transparent=True)
 
 """ Evaluation """
 from sklearn.metrics import roc_auc_score, roc_curve, auc,mean_squared_error\
@@ -620,7 +617,7 @@ print(test.groupby(['d_higher'])[["price_diff"]].sum())
 print(test.groupby(['d_higher','predict'])[["price_diff"]].sum())
 
 
-describe = np.round(test.describe(), 2).T
+#describe = np.round(test.describe(), 2).T
 
 #print("classification_report: \n",classification_report(y_test,clf_test_pred))
 #print("train_roc_auc_score:",roc_auc_score(y_train, clf_train_pred))
