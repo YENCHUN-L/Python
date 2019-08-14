@@ -4,6 +4,7 @@ data = df.copy() # dataframe
 # Get info
 from io import StringIO
 import pandas as pd
+import numpy as np
 def process_content_info(content: pd.DataFrame):
     content_info = StringIO()
     content.info(buf=content_info)
@@ -32,7 +33,7 @@ des['index'] = des.index
 # Get duplicate column
 index = list(data)
 y = list()
-for i in range(0,len(data),1):
+for i in range(0,len(data.columns),1):
     x = data.iloc[:,i].duplicated()
     if x.any() == True:
         t = True
@@ -48,4 +49,3 @@ data_information = pd.merge(info_table, des, how='left', left_on='index', right_
 data_information = pd.merge(data_information, dup, how='left', left_on='index', right_on='index')
 
 del f, i, t, index, y, data, x, dup, des, info_table
-
