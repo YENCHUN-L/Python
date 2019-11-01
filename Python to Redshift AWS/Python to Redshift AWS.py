@@ -23,6 +23,8 @@ colnames = [desc[0] for desc in cur.description]
 
 # Read query to np.array
 df = pd.DataFrame(np.array(cur.fetchall()))
+
+# Name columns
 df.columns = colnames
 
 del colnames
