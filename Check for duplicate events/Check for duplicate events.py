@@ -18,7 +18,7 @@ df['created_date'] = pd.to_datetime(df['created_date'])
 
 # get time difference when opp and status is the same
 # https://stackoverflow.com/questions/48347497/pandas-groupby-diff
-df['diff']=df.groupby(['id','event'])['created_date'].diff()
+df['diff']=df.groupby(['account_id','event'])['created_date'].diff()
 
 # change to seconds
 df['diff'] = df['diff'].dt.total_seconds()
