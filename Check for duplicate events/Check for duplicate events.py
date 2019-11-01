@@ -5,7 +5,8 @@ import os
 os.chdir(r"C:\Users\LocalUser\Desktop")
 
 # Desire table
-# event_id, account_id, event, created_date(to seconds data)
+# event_id, account_id, events, created_date(to seconds data)
+# order by account_id, events, created_date
 
 # Read library
 import psycopg2
