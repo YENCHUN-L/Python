@@ -6,6 +6,6 @@ import os
 local = os.path.expanduser(r"~\Downloads")
 os.chdir(local)
 
-ydl_opts = {}
+ydl_opts = {'ignoreerrors': True}
 with youtube_dl.YoutubeDL(ydl_opts) as ydl:
     ydl.download(['https://www.youtube.com/playlist?list=PLqIq1bkXU1VsGtE3bSbu-5FxmbacaGdu7'])
