@@ -9,5 +9,3 @@ os.chdir(local)
 ydl_opts = {}
 with youtube_dl.YoutubeDL(ydl_opts) as ydl:
     ydl.download(['https://www.youtube.com/playlist?list=PLqIq1bkXU1VsGtE3bSbu-5FxmbacaGdu7'])
-
-    
