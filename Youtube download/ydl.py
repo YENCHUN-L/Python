@@ -6,7 +6,12 @@ import os
 local = os.path.expanduser(r"~\Downloads")
 os.chdir(local)
 
+# Media
 ydl_opts = {'ignoreerrors': True,
-            'format':'m4a'}
+            'format':'mp4'}
 with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-    ydl.download(['https://www.youtube.com/playlist?list=PLqIq1bkXU1VsGtE3bSbu-5FxmbacaGdu7'])
+    ydl.download(['https://www.youtube.com/playlist?list=PLqIq1bkXU1Vuxi9wSz4OYtivOIcZhkgQf'])
+    
+    
+    
+    
