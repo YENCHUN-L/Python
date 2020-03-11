@@ -1,1 +1,5 @@
-
+Spyder Python 3.7
+Tensorflow 2.0.0 pip install tensorflow-gpu==2.0.0
+Visual Studio 2015
+Cuda toolkit 10.0
+Cudnn 10.2
