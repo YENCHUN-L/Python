@@ -1,5 +1,6 @@
 Spyder Python 3.7
 Tensorflow 2.0.0 pip install tensorflow-gpu==2.0.0
 Visual Studio 2015
+GPU should be on this list https://developer.nvidia.com/cuda-gpus
 Cuda toolkit 10.0
 Cudnn 10.2
