@@ -1,7 +1,7 @@
 import os
 import imageio
 
-png_dir = 'C:/Users/yliu10/Desktop/png' #png folder path
+png_dir = 'C:/Users/"user"/Desktop/png' #png folder path
 images = []
 for file_name in os.listdir(png_dir):
     if file_name.endswith('.png'):
