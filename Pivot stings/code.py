@@ -2,7 +2,7 @@
 """
 Created on Thu May 19 16:12:27 2022
 
-@author: F0004957
+@author: 
 """
 
 import os
