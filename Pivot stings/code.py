@@ -11,7 +11,7 @@ import numpy as np
 import sys
 
 # assign data of lists.  
-data = {'產業': ['a','a','a','b', 'b', 'c', 'c'], '公司': ['a', 'b', 'c', 'd', 'e', 'f', 'g']}
+data = {'industry': ['a','a','a','b', 'b', 'c', 'c'], 'companies': ['a', 'b', 'c', 'd', 'e', 'f', 'g']}
 
 
 # Create DataFrame  
@@ -20,11 +20,11 @@ df = pd.DataFrame(data)
 df['Value'] = 1
 
 
-df1 = df.pivot_table(index='產業', values='Value', aggfunc='sum')
+df1 = df.pivot_table(index='industry', values='Value', aggfunc='sum')
 
 max_company = df1['Value'].max()
 
-df2 = df.pivot_table(index='產業', columns='Value', values='公司', aggfunc=lambda x: ' '.join(x))
+df2 = df.pivot_table(index='industry', columns='Value', values='companies', aggfunc=lambda x: ' '.join(x))
 
 df2.columns = ['name']
 
