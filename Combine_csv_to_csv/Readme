@@ -1,4 +1,4 @@
-Combine all csv from single folder
+Combine csv from single folder
 Without facing ram issue due to not combine within ram.
 Script finds all csv pattern filenames, read each files and write/update to combine_csv file through a for loop to minimize the use of ram.
 
