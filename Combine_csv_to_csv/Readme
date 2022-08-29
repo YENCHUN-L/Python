@@ -1,4 +1,4 @@
 Combine all csv from single folder
 Without facing ram issue due to not combine within ram.
-Read each csv with single operation and write
+Script finds all csv pattern filenames, read each files with single operation and write/update to combine_csv file through a for loop.
 
