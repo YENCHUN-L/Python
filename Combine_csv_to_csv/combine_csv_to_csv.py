@@ -20,3 +20,4 @@ for f in all_filenames:
     df = pd.read_csv(f)
     #write to csv
     df.to_csv( "combined_csv.csv", index=False, encoding='utf-8-sig', mode='a')
+    del df
