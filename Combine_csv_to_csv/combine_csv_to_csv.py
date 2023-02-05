@@ -13,7 +13,7 @@ all_filenames = [i for i in glob.glob('*.{}'.format(extension))]
 #print(all_filenames)
 
 #Looping to read all files and write(update) to csv
-#Would not face ram limit due to read each file
+#Would not face ram limit due not merging data in ram.
 #encoding='utf-8-sig' fix displaying issue
 for f in all_filenames:
     #Read csv
